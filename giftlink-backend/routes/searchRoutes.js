@@ -1,42 +1,56 @@
-const express = require('express');
-const router = express.Router();
-const connectToDatabase = require('../models/db');
+	require('dotenv').config();
+	const express = require('express');
+	const cors = require('cors');
+	const pinoLogger = require('./logger');
 
-// Search for gifts
-router.get('/', async (req, res, next) => {
-    try {
-        // Task 1: Connect to MongoDB using connectToDatabase database. Remember to use the await keyword and store the connection in `db`
-        // {{insert code here}}
+	const connectToDatabase = require('./models/db');
+	const {loadData} = require("./util/import-mongo/index");
 
-        const collection = db.collection("gifts");
 
-        // Initialize the query object
-        let query = {};
+	const app = express();
+	app.use("*",cors());
+	const port = 3060;
 
-        // Add the name filter to the query if the name parameter is not empty
-        // if (/* {{insert code here}} */) {
-            query.name = { $regex: req.query.name, $options: "i" }; // Using regex for partial match, case-insensitive
-        // }
+	// Connect to MongoDB; we just do this one time
+	connectToDatabase().then(() => {
+		pinoLogger.info('Connected to DB');
+	})
+		.catch((e) => console.error('Failed to connect to DB', e));
 
-        // Task 3: Add other filters to the query
-        if (req.query.category) {
-            // {{insert code here}}
-        }
-        if (req.query.condition) {
-            // {{insert code here}} 
-        }
-        if (req.query.age_years) {
-            // {{insert code here}}
-            query.age_years = { $lte: parseInt(req.query.age_years) };
-        }
 
-        // Task 4: Fetch filtered gifts using the find(query) method. Make sure to use await and store the result in the `gifts` constant
-        // {{insert code here here}}
+	app.use(express.json());
 
-        res.json(gifts);
-    } catch (e) {
-        next(e);
-    }
-});
+	// Route files
+	// Gift API Task 1: import the giftRoutes and store in a constant called giftroutes
+	const giftRoutes = require('./routes/giftRoutes');
 
-module.exports = router;
+	// Search API Task 1: import the searchRoutes and store in a constant called searchRoutes
+	//{{insert code here}}
+
+
+	const pinoHttp = require('pino-http');
+	const logger = require('./logger');
+
+	app.use(pinoHttp({ logger }));
+
+	// Use Routes
+	// Gift API Task 2: add the giftRoutes to the server by using the app.use() method.
+	app.use('/api/gifts', giftRoutes);
+
+	// Search API Task 2: add the searchRoutes to the server by using the app.use() method.
+	//{{insert code here}}
+
+
+	// Global Error Handler
+	app.use((err, req, res, next) => {
+		console.error(err);
+		res.status(500).send('Internal Server Error');
+	});
+
+	app.get("/",(req,res)=>{
+		res.send("Inside the server")
+	})
+
+	app.listen(port, () => {
+		console.log(`Server running on port ${port}`);
+	});
