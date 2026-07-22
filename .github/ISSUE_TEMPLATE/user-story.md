@@ -16,6 +16,6 @@ assignees: ''
 
 ### Acceptance Criteria
     gherkin
-    Given [some context]
-    When [certain action is taken]
-    Then [the outcome of action is observed]
+    Given the user is on the gift search page
+    When the user enters a category filter for books
+    Then only books available as gifts should be displayed in the results
